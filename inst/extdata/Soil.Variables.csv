@@ -1,0 +1,34 @@
+Measurement Type,,Variable Name,Variable Description,Units
+Soil,,ALUM,Aluminium,meq/100g
+Soil,,BD,Dry bulk density,g/cm3
+Soil,,BORO,Boron,mg/kg
+Soil,,CALC,Calcium,meq/100g
+Soil,,CEC,Cation Exchange Capacity,
+Soil,,CHLO,Chloride,mg/kg
+Soil,,clay,clay,%
+Soil,,COPP,Copper,mg/kg
+Soil,,ELEC,Electicial conductivity,dS/m
+Soil,,IRON,Iron,mg/kg
+Soil,,MAGN,Magnesium,meq/100g
+Soil,,MANG,Manganese,mg/kg
+Soil,,Mn,Mn,mg/kg
+Soil,,Na,Na,meg/100g
+Soil,,NH4,Ammonium-N Concentration in Dry Soil,mg/kg
+Soil,,NO3,Nitrate-N Concentration in Dry Soil,mg/kg
+Soil,,ORGC,Organic carbon,g/g
+Soil,,ORGN,Organic nitrogen,g/g
+Soil,,PH,Soil pH,-
+Soil,,PHOS,Phosphorus,mg/kg
+Soil,,POTA,Potassium,meq/100g
+Soil,,RESID,Amount of Residue,g/m2
+Soil,,RESIDCN,Residue C:N Ratio,
+Soil,,sand,sand,%
+Soil,,silt,silt,%
+Soil,,SODI,Sodium,meq/100g
+Soil,,SULF,Sulphur,mg/kg
+Soil,,SWC,Volumetric Soil water Content,cm/cm
+Soil,,SWP,Soil Water Potential,MPa
+Soil,,TOTN,Total nitrogen,g/g
+Soil,,WATTAB,Depth to Water Table,cm
+Soil,,WATTABN,Water Table Nitrogen Concentration,mg/L
+Soil,,ZINC,Zinc,mg/kg

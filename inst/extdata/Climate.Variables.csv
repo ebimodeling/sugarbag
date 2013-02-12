@@ -1,0 +1,12 @@
+Measurement Type,,Variable Name,Variable Description,Units
+Climate,,ET,EvapoTranspiration,mm
+Climate,,EVAP,Evaporation,mm
+Climate,,HUMMAX,Maximum Humidity,%
+Climate,,HUMMIN,Minimum Humidity,%
+Climate,,RAIN,Rainfall,mm
+Climate,,SOLAR,Solar radiation,MJ/m2
+Climate,,TMAX,Maximum air temperature,oC
+Climate,,TMIN,Minimum air temperature,oC
+Climate,,WIND,Wind Run,Km
+Climate,,WINDDIR,Wind Direction,deg.
+Climate,,WINDSD,Wind Direction - Standard Deviation,deg.
