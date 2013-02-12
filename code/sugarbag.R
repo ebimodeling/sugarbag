@@ -1,15 +1,34 @@
 setwd(system.file("extdata", package = "sugarbag"))
+
+## Reading Fixed Information
+Fx.ClimateVar <- read.csv("Climate.Variables.csv")
+Fx.Crop.Variables <- read.csv("Crop.Variables.csv")
+Fx.Experiment.Field <- read.csv("Experiment.Field.csv")
+Fx.Experiment.Site <- read.csv("Experiment.Site.csv")
+Fx.Factors <- read.csv("Factors.csv")
+Fx.Fertilizer <- transform(read.csv("Fertilizer.csv"), Fertilizer = Fertiliser)
+Fx.Method <- read.csv("Method.csv")
+Fx.Notes  <-  read.csv("Notes.csv")
+Fx.Researcher <- read.csv("Researcher.csv")
+Fx.Soil <- read.csv("Soil.csv")
+Fx.Soil.Layers <- read.csv("Soil.Layers.csv")
+Fx.Soil.Variables <- read.csv("Soil.Variables.csv")
+Fx.Weather.Station <- read.csv("Weather.Station.csv")
+
+
 Experiment.Summary <- read.csv("Experiment.Summary.csv")
 
 ## traits and yields
-traitsandyields <- read.csv("Harvest.Data.csv")
-yields <- with(traitsandyields,
-               data.frame(expid = ExpID,
-                          site_id = Plot,
-                          date = dmy(Date),
+Harvest.Data <- read.csv("Harvest.Data.csv")
+yields <- with(Harvest.Data,
+               data.frame(ExpID,
+                          Plot,
+                          Date = dmy(Date),
                           mean = TDWT))
+yields <- yields[!is.na(yields$mean),]
+ggplot(yields, aes(Date, mean, group = ExpID, color = Plot)) + geom_point()
 
-traits <- traitsandyields[,-which(colnames(traitsandyields) %in% c("X", "TDWT"))]
+traits <- Harvest.Data[,-which(colnames(Harvest.Data) %in% c("X", "TDWT"))]
 traits$Date <- dmy(traits$Date)
 traits <- melt(traits, id.vars = 1:4, na.rm = TRUE)
 
@@ -21,36 +40,40 @@ Weather.Data <- read.csv("Weather.Data.csv")
 
 
 ## treatments
-treatments <- read.csv("Experiment.Design.csv")
-treatments <- treatments[,-which(colnames(treatments) %in% c("X"))]
-melt(treatments, id.vars)
+Experiment.Design <- read.csv("Experiment.Design.csv")
+Experiment.Design2 <- Experiment.Design[,-which(colnames(Experiment.Design) %in% c("X"))]
 
+cultivars <- Experiment.Design2[, c("ExpID", "Treatment", "Rep", "Plot", "Cultivar")]
+treatments <- cbind(Experiment.Design2[,1:4], 
+                    name = do.call(paste0, Experiment.Design2[,c(5:8,10:23)]))
 
 ## managements
-irrigation <- read.csv("Irrigation.csv")
-planting <-  read.csv("Planting.csv")
-tillage <- read.csv("Tillage.csv")
-fertilization <- read.csv("Fertilization.csv")
+Irrigation <- read.csv("Irrigation.csv")
+Planting <-  read.csv("Planting.csv")
+Tillage <- read.csv("Tillage.csv")
+Fertilization <- read.csv("Fertilization.csv")[, c("ExpID", "Treatment", "Date", "Fertilizer", "Amount")]
+Fx.Fertilizer <- transform(Fx.Fertilizer, percentN = N./100)
+n.conversions <- Fx.Fertilizer[Fx.Fertilizer$Fertilizer %in% unique(Fertilization$Fertilizer),
+                               c("Fertilizer", "percentN")]
 
+Fertilization <- merge(Fertilization, n.conversions, by = "Fertilizer")
+fertilization <- with(Fertilization[Fertilization$percentN > 0,],
+                      data.frame(ExpID, Treatment, Date, fertilizerN = Amount * percentN))
+fertilization.all <- merge(treatments[,c("ExpID", "Treatment")], 
+                           fertilization[fertilization$Treatment == "ALL", -2],
+                           by = c("ExpID"))
+fertilization.notall <- fertilization[fertilization$Treatment != "ALL", ]
+fertilization <- rbind(fertilization.all, fertilization.notall)
+
+fertilizerN.total <- ddply(fertilization, 
+                           .(ExpID, Treatment), 
+                           summarize, fertilizerN = sum(fertilizerN))
 ## combine planting, irrigation, fertilization, tillage into managements
 
 
 
 
-## Reading Fixed Information
-Fx.ClimateVar <- read.csv("Climate.Variables.csv")
-Fx.Crop.Variables <- read.csv("Crop.Variables.csv")
-Fx.Experiment.Field <- read.csv("Experiment.Field.csv")
-Fx.Experiment.Site <- read.csv("Experiment.Site.csv")
-Fx.Factors <- read.csv("Factors.csv")
-Fx.Fertilizer <- read.csv("Fertilizer.csv")
-Fx.Method <- read.csv("Method.csv")
-Fx.Notes  <-  read.csv("Notes.csv")
-Fx.Researcher <- read.csv("Researcher.csv")
-Fx.Soil <- read.csv("Soil.csv")
-Fx.Soil.Layers <- read.csv("Soil.Layers.csv")
-Fx.Soil.Variables <- read.csv("Soil.Variables.csv")
-Fx.Weather.Station <- read.csv("Weather.Station.csv")
+
 
 ## Create BETYdb variables table
 varcols <- c("Measurement.Type", "Variable.Name", "Variable.Description", "Units")
@@ -72,9 +95,13 @@ sites <- with(Fx.Experiment.Site,
                          sitename = Site.Name,
                          SB.id = Site.ID))
 
-## treatments
+## merge yields w/ meta-data
 
 
+Y <- merge(yields, cultivars, by = c("ExpID", "Plot"))
+Y2 <- merge(Y, treatments, by = c("ExpID", "Plot", "Treatment", "Rep"))
+Y3 <- merge(Y2, fertilizerN.total, by = c("ExpID", "Treatment"))
+ggplot(data = Y3, aes(fertilizerN, mean)) + geom_point()
 
 
 
