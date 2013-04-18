@@ -19,6 +19,14 @@ Fx.Weather.Station <- read.csv("Weather.Station.csv")
 Experiment.Summary <- read.csv("Experiment.Summary.csv")
 
 ## traits and yields
+traits2 <- merge(traits, Fx.Crop.Variables, by.x = "variable", by.y = "Variable.Name", all.x = FALSE, all.y = FALSE)
+Traits <- data.table(traits2)
+
+### some summaries of the Trait data
+Traits[,list(n = sum(!is.na(value))), by = Variable.Description]
+ts <- Traits[,list(n = sum(!is.na(value))), by = Variable.Description]
+
+## Yield data
 Harvest.Data <- read.csv("Harvest.Data.csv")
 yields <- with(Harvest.Data,
                data.frame(ExpID,
