@@ -29,12 +29,11 @@ traits <- data.table(Harvest.Data, key = c("ExpID", "Plot", "Date", "Sample"))
 traits <- data.table(melt(traits, id.var = c("ExpID", "Plot", "Date", "Sample"), variable.name = "variables.name", value.name = "mean", na.rm = TRUE))
 traits$Date <- lubridate::dmy(traits$Date)
 
-
 ## cultivars
 Experiment.Design <- data.table(read.csv("Experiment.Design.csv"), key = 'ExpID,Plot')
 cultivars <- Experiment.Design[!is.na(Cultivar),list(ExpID, Plot, Cultivar)]
 
-traits <- merge(traits, cultivars, by = c("ExpID", "Plot"))
+traits <- merge(traits, cultivars, by = c("ExpID", "Plot"), all.x = TRUE)
 
 ## sites
 
@@ -42,11 +41,23 @@ sites <- data.table(Fx.Experiment.Site, key = "SiteID")
 experiment.summary <- data.table(Experiment.Summary, key = "ExpID")
 experiments_sites <- data.table(experiment.summary)[,list(ExpID, MetStation, planting = BeginDate), by = "SiteID"]
 experiments_sites$planting <- mdy(experiments_sites$planting)
-sites <- merge(sites, experiments_sites)
+sites <- merge(sites, experiments_sites, by = "SiteID")
 
 bety.sites <- sites[,list(sitename = SiteName, lat = Latitude, lon = Longitude, city = City, state = Region), by = "SiteID"]
 
 traits <- merge(traits, sites, by = "ExpID")
+
+
+## Treatments
+experiment.design <- data.table(melt(Experiment.Design, id.var = c('ExpID','Treatment','Rep', 'Plot'), variable.name = "managements.type", value.var = "managements.level", na.rm = TRUE))[value != ""]
+
+### assign '1' to missing values of Replication  
+experiment.design[is.na(Rep)]$Rep <- integer(1)
+
+## Currently not clear what data we need from experiment.design:
+## Fertilization is in Fertilization.csv
+## Irrigation in Irrigation.csv
+## traits <- merge(traits, experiment.design, by = c('ExpID','Plot'))
 
 ## Variables
 variables <- data.table(read.csv("all.variables.csv"))
@@ -66,21 +77,18 @@ traits[units == "g/m2"]$units <- "Mg/ha"
 
 setnames(traits, c("Plot", "Date", "Cultivar", "SiteName", "City", "Region", "Latitude", "Longitude", "Elevation"), c("entity_id", "date", "cultivars.name", "sites.sitename", "sites.city", "sites.state", "lat", "lon", "masl"))
 
-### Yields: total aboveground dry weight
+## Yields: total aboveground dry weight
 
-yields <- traits[variables.name == "DWTOTA",]
-hist(traits[variables.name == "DWTOTA", mean])
+### DWMST: Dry Weight Millable Stem === Yield
+yields <- traits[variables.name == "DWMST",]
 
+stem_yields <- traits[variables.name == "DWTOTA",]
 
-experiment.design <- data.table(melt(Experiment.Design, id.var = c('ExpID','Treatment','Rep', 'Plot'), variable.name = "managements.type", value.var = "managements.level"), na.rm = TRUE)
-
-## assign '1' to missing values of Replication  
-experiment.design[is.na(Rep)]$Rep <- 1
-
-traits <- merge(traits, experiment.design, by = c('ExpID','Plot'))
+## harvests
+harvests <- yields[, list(foo =unique(date)), by = 'ExpID']
 
 
-yields <- traits[variables.name == "TDWT",]
+yields <- traits[variables.name %in% c("TDWT",]
 
 
 Experiment.Design <- Experiment.Design[,-which(colnames(Experiment.Design) %in% c("X"))]
