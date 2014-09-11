@@ -6,14 +6,8 @@ Date: 2013-02-08
 Author: David LeBauer, Deepak Jaiswal
 Maintainer: David LeBauer <dlebauer@illinois.edu>
 Description: Sugarbag database made accessible. The SUGARBAG database was originally published by L.A. Laredo and D.B. Prestwidge, CSIRO Sustainable Ecosystems, Brisbane. June 2003.  ISBN 1 87669 35 2. This database was obtained as a set of xls files.
-Depends:
-    PEcAn.DB,
-    PEcAn.utils,
-    lubridate,
-    reshape,
-    ggplot2,
-    plyr
 License: FreeBSD + file LICENSE
 Copyright: Authors
 LazyLoad: yes
 LazyData: FALSE
+Packaged: 2014-09-11 16:06:41 UTC; djaiswal
