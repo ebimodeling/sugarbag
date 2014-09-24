@@ -1,9 +1,8 @@
-GetMeasuredYield<-function(expID, varname)
+GetExpID<-function()
 {
   data(HarvestData)
-  df<-HarvestData[HarvestData$ExpID==expID,]
-  varcol<-df[which(names(df)==varname)]
-  df<-cbind(df[,c(1,2,3,4)],varcol)
+  df<-unique(as.vector(HarvestData$ExpID))
+  rm(list=("HarvestData"))
   return(df)
 }
 

@@ -11,4 +11,5 @@ Copyright: Authors
 LazyLoad: yes
 LazyData: FALSE
 Packaged: 2014-09-11 16:06:41 UTC; djaiswal
-Depends: udunits2, data.table, lubridate, reshape2
+Depends:  data.table, lubridate, reshape2
+Suggests: udunits2
