@@ -1,36 +1,16 @@
-setwd(system.file("extdata", package = "sugarbag"))
-library(udunits2)
+library(sugarbag)
 
-## Reading Fixed Information
-Fx.ClimateVar <- read.csv("Climate.Variables.csv")
-Fx.Crop.Variables <- read.csv("Crop.Variables.csv")
-Fx.Experiment.Field <- read.csv("Experiment.Field.csv")
-Fx.Experiment.Site <- read.csv("Experiment.Site.csv")
-Fx.Factors <- read.csv("Factors.csv")
-Fx.Fertilizer <- transform(read.csv("Fertilizer.csv"), Fertilizer = Fertiliser)
-Fx.Method <- read.csv("Method.csv")
-Fx.Notes  <-  read.csv("Notes.csv")
-Fx.Researcher <- read.csv("Researcher.csv")
-Fx.Soil <- read.csv("Soil.csv")
-Fx.Soil.Layers <- read.csv("Soil.Layers.csv")
-Fx.Soil.Variables <- read.csv("Soil.Variables.csv")
-Fx.Weather.Station <- read.csv("Weather.Station.csv")
-# List.Of.Experiment <- read.csv("List.Of.Experiments.csv") only contains expt name
-Notes <- read.csv("Notes.csv")
-Experiment.Summary <- read.csv("Experiment.Summary.csv")
-ResearcherPerExperiment <- read.csv("ResearchersPerExperiment.csv")
-Weather.Data <- read.csv("Weather.Data.csv")
-
-## traits and yields
-Harvest.Data <- read.csv("Harvest.Data.csv")
-
+data(Sugarbag)
 
 traits <- data.table(Harvest.Data, key = c("ExpID", "Plot", "Date", "Sample"))
-traits <- data.table(melt(traits, id.var = c("ExpID", "Plot", "Date", "Sample"), variable.name = "variables.name", value.name = "mean", na.rm = TRUE))
+traits <- melt(traits, 
+               id.var = c("ExpID", "Plot", "Date", "Sample"), 
+               variable.name = "variables.name", 
+               value.name = "mean", na.rm = TRUE)
 traits$Date <- lubridate::dmy(traits$Date)
 
 ## cultivars
-Experiment.Design <- data.table(read.csv("Experiment.Design.csv"), key = 'ExpID,Plot')
+
 cultivars <- Experiment.Design[!is.na(Cultivar),list(ExpID, Plot, Cultivar)]
 
 traits <- merge(traits, cultivars, by = c("ExpID", "Plot"), all.x = TRUE)
@@ -43,7 +23,10 @@ experiments_sites <- data.table(experiment.summary)[,list(ExpID, MetStation, pla
 experiments_sites$planting <- mdy(experiments_sites$planting)
 sites <- merge(sites, experiments_sites, by = "SiteID")
 
-bety.sites <- sites[,list(sitename = SiteName, lat = Latitude, lon = Longitude, city = City, state = Region), by = "SiteID"]
+bety.sites <- sites[,list(sitename = SiteName, 
+                          lat = Latitude, 
+                          lon = Longitude, 
+                          city = City, state = Region), by = "SiteID"]
 
 traits <- merge(traits, sites, by = "ExpID")
 
@@ -60,7 +43,7 @@ experiment.design[is.na(Rep)]$Rep <- integer(1)
 ## traits <- merge(traits, experiment.design, by = c('ExpID','Plot'))
 
 ## Variables
-variables <- data.table(read.csv("all.variables.csv"))
+
 if(sum(!unique(traits$variables.name) %in% variables$VariableName)>0){
   stop(paste("missing", unique(traits$variables.name)[which(!unique(traits$variables.name) %in% variables$VariableName)]))
   
@@ -75,7 +58,8 @@ traits <- merge(traits, variables, by = 'variables.name')
 traits[units == "g/m2"]$mean <- traits[units == "g/m2", ud.convert(mean, "g/m2", "Mg/ha")]
 traits[units == "g/m2"]$units <- "Mg/ha"
 
-setnames(traits, c("Plot", "Date", "Cultivar", "SiteName", "City", "Region", "Latitude", "Longitude", "Elevation"), c("entity_id", "date", "cultivars.name", "sites.sitename", "sites.city", "sites.state", "lat", "lon", "masl"))
+setnames(traits, c("Plot", "Date", "Cultivar", "SiteName", "City", "Region", "Latitude", "Longitude", "Elevation"), 
+         c("entity_id", "date", "cultivars.name", "sites.sitename", "sites.city", "sites.state", "lat", "lon", "masl"))
 
 ## Yields: total aboveground dry weight
 
@@ -88,20 +72,17 @@ stem_yields <- traits[variables.name == "DWTOTA",]
 harvests <- yields[, list(foo =unique(date)), by = 'ExpID']
 
 
-yields <- traits[variables.name %in% c("TDWT",]
+yields <- traits[variables.name %in% c("TDWT"),]
 
 
-Experiment.Design <- Experiment.Design[,-which(colnames(Experiment.Design) %in% c("X"))]
+Experiment.Design2 <- experiment.design[,-which(colnames(experiment.design) %in% c("X"))]
 
 cultivars <- Experiment.Design2[, c("ExpID", "Treatment", "Rep", "Plot", "Cultivar")]
 treatments <- cbind(Experiment.Design2[,1:4], 
                     name = do.call(paste0, Experiment.Design2[,c(5:8,10:23)]))
 
 ## managements
-Irrigation <- read.csv("Irrigation.csv")
-Planting <-  read.csv("Planting.csv")
-Tillage <- read.csv("Tillage.csv")
-Fertilization <- read.csv("Fertilization.csv")[, c("ExpID", "Treatment", "Date", "Fertilizer", "Amount")]
+
 Fx.Fertilizer <- transform(Fx.Fertilizer, percentN = N./100)
 n.conversions <- Fx.Fertilizer[Fx.Fertilizer$Fertilizer %in% unique(Fertilization$Fertilizer),
                                c("Fertilizer", "percentN")]
