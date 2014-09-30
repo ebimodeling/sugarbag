@@ -14,9 +14,120 @@ varname <- "DWMST"
 result <-data.frame( Yield = numeric(), N_rate=numeric())
 names(result)[1] <- varname
 
-# Step 2:-  Get ID of all the experiments
-expID <- GetExpID()
+# Step 2:-  Get ID of all the experiments wgere N treatments were applied
+# Which means all the rows (or ExpID) in ExperimentDesign data frame for which there is non-mising value in either of
+# the three columns (1) N RATE (2) N Rates (3) N Rates over 2 years
+data(ExperimentDesign)
+experimentsubsets <-subset(ExperimentDesign, select  = c("ExpID", "Treatment","N.RATE", "N.Rates", "N.Rates.over.2.years"))
+experimentsubsets <- data.frame(lapply(experimentsubsets, as.character), stringsAsFactors=FALSE)
+experimentsubsets <- experimentsubsets [!(experimentsubsets$N.RATE == "") | !(experimentsubsets$N.Rates == "") | !(experimentsubsets$N.Rates.over.2.years == ""), ]
+experimentsubset <- get_total_N(experimentsubsets)
 
+
+expID <-as.vector(as.numeric(experimentsubsets$ExpID))
+data(HarvestData)
+varname= "DWMST"
+harvestdata <- subset(HarvestData,select = c("ExpID","Plot", "Date", varname))
+for ( i in 1: length(expID))
+{
+  harvestdata_expID <- harvestdata[(harvestdata$ExpID == expID[i]),]
+  treatment <- get_plot_and_treatments(expID[i])
+  harvestdata_expID <- merge(harvestdata_expID, treatment, by = "Plot")
+  tmp <-experimentsubsets[experimentsubsets$ExpID == expID[i],]
+  harvestdata <- merge(harvestdata, tmp, by = "Treatment")
+}
+
+harvestdata <- update_total_N (harvestdata)
+
+experimentsubset <- function (experimentsubsets){
+  N1 <- experimentsubsets$N.RATE
+  N2 <- experimentsubsets$N.Rates
+  N3 <- experimentsubsets$N.Rates.over.2.years
+  N1_updated <- numeric (length(N1))
+  N1_updated <- N_function1 (as.vector(N1))
+
+  
+}
+ N_function1 <- function (N1){
+   for (i in 1: length(N1)){
+     if(N1[i] ==""){
+       result = NA
+     } else{
+             if(N1[i] == "56 kg/ha"){
+               result <- 56
+             }
+             if(N1[i] == "107 kg/ha"){
+               result <- 107
+             }
+             if(N1[i] == "268 kg/ha"){
+               result <- 268
+             }
+             if(N1[i] == "35 kg/ha"){
+               result <- 35
+             }
+             if(N1[i] == "257 kg/ha"){
+               result <- 257
+             }
+             if(N1[i] == "407 kg/ha"){
+               result <- 407
+             }
+             if(N1[i] == "0 kg/ha"){
+               result <- 0
+             }
+             if(N1[i] == "50 kg/ha"){
+               result <- 50
+             }
+             if(N1[i] == "high"){
+               result <- 400
+             }
+             if(N1[i] == "230 kg/ha"){
+               result <- 230
+             }
+             if(N1[i] == "350 kg/ha"){
+               result <- 350
+             }
+     }
+   }
+   return(result)
+ }
+
+Numerical_N.RATE <- function (N.RATE){
+  
+  if(N.RATE == "56 kg/ha"){
+    result <- 56
+  }
+  if(N.RATE == "107 kg/ha"){
+    result <- 107
+  }
+  if(N.RATE == "268 kg/ha"){
+    result <- 268
+  }
+  if(N.RATE == "35 kg/ha"){
+    result <- 35
+  }
+  if(N.RATE == "257 kg/ha"){
+    result <- 257
+  }
+  if(N.RATE == "407 kg/ha"){
+    result <- 407
+  }
+  if(N.RATE == "0 kg/ha"){
+    result <- 0
+  }
+  if(N.RATE == "50 kg/ha"){
+    result <- 50
+  }
+  if(N.RATE == "230 kg/ha"){
+    result <- 230
+  }
+  if(N.RATE == "350 kg/ha"){
+    result <- 350
+  }
+  if(N.RATE == ""){
+    result = NA
+  }
+  return(result)  
+}
 # Step 3:- Get Number of experiments
 N_experiment <- length(expID)
 

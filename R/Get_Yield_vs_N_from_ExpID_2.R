@@ -35,28 +35,10 @@ Get_Yield_vs_N_from_ExpID <- function(expID, varname)
   #Step 6: - Add Treatment in harvestdata 
   harvestdata <- merge(harvestdata, treatment, by = "Plot")
   
-  # Identify startdate and enddate associated with measured variable and update result
-  # by inserting additional columns of startdate and enddate
-  get_start_end_date(result)
+  # Step 7:- Add total N application based on  corresponding date of measurement on each plot
+  harvestdata <- Add_total_N_from_ExpDesign(harvestdata)    
   
-    
-  # Calculate Total fertilizer applied for each measurement on each plot between start and end date
-  get_total_N_between_start_end(result)
-                      
-                      result$totalN=0
-                      for (i in 1:length(result$Treatment))
-                      {
-                       fertilizer <- getNforExp_Treatment(expID,as.vector(result$Treatment[i]))
-                       result$totalN[i]<-sum(fertilizer$Amount)
-                      }  
-                      Fertilisation<-Fertilisation[(Fertilisation$ExpID==expID),]
-            
-  #Step 3:- Calculate Total N application using dataframe of Time, N amount for
-  #         a given plot
-  #Step 4:- Combine Total N application and a single measured value of variable for 
-  #          a plot ID wit given ExpID
-  #Step 5:- Use rbind to combine total N for all the plots with  given ExpID
-  #Step 6:- Return ExpID with columns for plot ID and Total N for all the plots
-  #         of a given ExpID
-    
+  # Step 8: -
+  # Return updated data frame harvestdata 
+  return(harvestdata)
 }
