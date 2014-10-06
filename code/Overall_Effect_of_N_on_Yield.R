@@ -18,6 +18,12 @@ varname <- "DWMST"
 # Step 3:- Call a function which will return all the plots associated with expID, along with treatment ID, date and value of measurement of variable of interest
 result <- Get_Variable_from_ExpID(expID, varname)
 
+#Step 4: - Add Treatment associated with Plot
+treatment <- get_plot_and_treatments(expID)
+
+#Step 5 :- Merge Treatment with the data table containing measured variable
+
+
 # Step 4:- Call a function which will return start date of crop, which corresponds to a measurved value on a given date of a plot in an expID
 result <- Add_start_date(expID,Plot,Treatment, varname, Date_Measurement )
 
