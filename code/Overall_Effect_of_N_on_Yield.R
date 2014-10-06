@@ -8,7 +8,7 @@ id <- expID[1]
 Output <- Total_N_for_expID(id, varname)
 N = length(expID)
 
-for (i in 1:N){
+for (i in 2:N){
   id <- expID[i]
   tmp_output <- Total_N_for_expID(id, varname)
   Output <- rbind(Output,tmp_output)
