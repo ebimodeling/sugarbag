@@ -9,8 +9,18 @@
 #  Slope and Intercept of Yield versus N application rate
 ###################################################################################################
 
-# Step 1:- What are we interest in?
+# Step 1:- Get all the experiment IDs
+expID <-GetExpID()
+
+# Step 2 :- Define variable name that we are interested in
 varname <- "DWMST"
+
+# Step 3:- Call a function which will return all the plots associated with expID, along with treatment ID, date and value of measurement of variable of interest
+result <- Get_Variable_from_ExpID(expID, varname)
+
+# Step 4:- Call a function which will return start date of crop, which corresponds to a measurved value on a given date of a plot in an expID
+result <- Add_start_date(expID,Plot,Treatment, varname, Date_Measurement )
+
 result <-data.frame( Yield = numeric(), N_rate=numeric())
 names(result)[1] <- varname
 
