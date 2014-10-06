@@ -7,8 +7,8 @@ GetExpID <- function()
 # Output:-
 # List of numbers which contains information about experimentID as defined in SUGARBAG databas
 ################################################################################################
-  data(HarvestData)
-  df<-unique( as.vector( HarvestData$ExpID ) )
+  data(ExperimentDesign)
+  df<-unique( as.vector( ExperimentDesign$ExpID ) )
   return(df)
 }
 
