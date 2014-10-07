@@ -21,5 +21,5 @@ for (i in 2:N){
 library(lattice)
 png(file = "/home/djaiswal/Desktop/N_summary.png")
 Output$ExpID = as.factor(Output$ExpID)
-xyplot(DWMST ~ TotalN | ExpID, data= Output)
+xyplot(DWMST ~ TotalN | ExpID, data= Output, type = "p", cex = 0.3, xlim = c(0,1000))
 dev.off()
