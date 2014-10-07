@@ -14,26 +14,7 @@ for (i in 2:N){
   Output <- rbind(Output,tmp_output)
 }
 
-for (i in 26:30){
-  id <- expID[i]
-  tmp_output <- Total_N_for_expID(id, varname)
-  Output <- rbind(Output,tmp_output)
-}
-
-
-for (i in 32:33){
-  id <- expID[i]
-  tmp_output <- Total_N_for_expID(id, varname)
-  Output <- rbind(Output,tmp_output)
-}
-
-for (i in 37:40){
-  id <- expID[i]
-  tmp_output <- Total_N_for_expID(id, varname)
-  Output <- rbind(Output,tmp_output)
-}
-
-for (i in 37:length(expID)){
+for (i in 76:N){
   id <- expID[i]
   tmp_output <- Total_N_for_expID(id, varname)
   Output <- rbind(Output,tmp_output)
@@ -41,5 +22,6 @@ for (i in 37:length(expID)){
 
 library(lattice)
 png(file = "/home/djaiswal/Desktop/N_summary.png")
-xyplot(DWMST ~ TotalN | ExpID , data= Output, auto.key=TRUE)
+Output$ExpID = as.factor(Output$ExpID)
+xyplot(DWMST ~ TotalN | ExpID, data= Output)
 dev.off()

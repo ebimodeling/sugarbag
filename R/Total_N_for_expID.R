@@ -1,11 +1,7 @@
 Total_N_for_expID <- function (expID, varname){
 # Step 1:- Call a function which will return all the plots associated with expID, along with treatment ID, date and value of measurement of variable of interest
 result <- Get_Variable_from_ExpID(expID, varname)
-if(dim(result)[1]==0){
-  result <- data.frame (Plot= NA, ExpID = expID, Date= NA, varname= NA, Treatment = NA, Start_Date= NA, TotalN=NA)
-  names(result)[4]<- varname
-}
-else {
+
 #Step 2: - Add Treatment associated with Plot
 treatment <- get_plot_and_treatments(expID)
 
@@ -31,7 +27,6 @@ TotalN <- Calculate_N_from_Start_to_End (N_application_on_expID, startdate, endd
 
 # Step 8 :- Update total N for the Plot of expID
 result$TotalN[i] <- TotalN
-}
 }
 return(result)
 }
