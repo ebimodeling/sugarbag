@@ -10,6 +10,7 @@ save(ExperimentList, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Exp
 HarvestData<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Harvest.Data.csv", stringsAsFactors=FALSE)
 save(HarvestData, file="/home/djaiswal/Research/gitprojects/sugarbag/data/HarvestData.rda")
 
+
 #Saving Weather Data
 WeatherData<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Weather.Data.csv", stringsAsFactors=FALSE)
 WeatherData<-WeatherData[,c(1,3,4,5,6,7,8)]
@@ -47,3 +48,8 @@ save(Fertilisation, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Fert
 # Saving Planting Information
 Planting<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Planting.csv", stringsAsFactors=FALSE)
 save(Planting, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Planting.rda")
+
+
+# Saving Experiment Sites
+Experiment.Site<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
+save(Experiment.Site, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Experiment.Site.rda")

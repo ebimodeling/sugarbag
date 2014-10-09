@@ -23,3 +23,9 @@ png(file = "/home/djaiswal/Desktop/N_summary.png")
 Output$ExpID = as.factor(Output$ExpID)
 xyplot(DWMST ~ TotalN | ExpID, data= Output, type = "p", cex = 0.3, xlim = c(0,1000))
 dev.off()
+
+#Density Plot of DWMST
+plot(density(Output$DWMST, na.rm=TRUE))
+
+#Density Plot of TotalN
+plot(density(Output$TotalN, na.rm=TRUE))
