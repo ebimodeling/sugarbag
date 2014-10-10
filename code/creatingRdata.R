@@ -53,3 +53,7 @@ save(Planting, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Planting.
 # Saving Experiment Sites
 Experiment.Site<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
 save(Experiment.Site, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Experiment.Site.rda")
+
+# Ursula's file
+Experiment.Site<-read.csv("C:/Users/ruizver1/Documents/myprojectEBI/sugarbag/inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
+save(Experiment.Site, file="C:/Users/ruizver1/Documents/myprojectEBI/sugarbag/data/Experiment.Site.rda")
