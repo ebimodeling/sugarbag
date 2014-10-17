@@ -11,9 +11,17 @@ get_plot_and_treatments<-function(expID)
   '
   ################################################################################################
   data(ExperimentDesign) # This contain information for relating plotID to Treatment
-  ExpDesign<-subset(ExperimentDesign, select=c("ExpID","Plot","Treatment"))
+  ExpDesign<-subset(ExperimentDesign, select=c("ExpID","Plot","Treatment", 'Ncombined', 'Cultivar'))
   # subset of ExpDesign for the given ExpID
   result<-ExpDesign[(ExpDesign$ExpID==expID),]
   result<-result[,c(-1)]
+  # Adding Irrigation
+  data(Irrigation)
+  IrrigatedExp <- unique(as.vector(Irrigation$ExpID))
+  if(expID %in% IrrigatedExp){
+    result$Irrigation = 1
+  } else {
+    result$Irrigation = 0
+  }
   return(result)
 }

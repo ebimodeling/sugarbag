@@ -37,6 +37,11 @@ ExperimentDesign<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/ex
 ExperimentDesign<-read.csv("C:/Users/djaiswal/Documents/R-dev/sugarbag/inst/extdata/Experiment.Design.csv", stringsAsFactors=FALSE)
 save(ExperimentDesign, file="/home/djaiswal/Research/gitprojects/sugarbag/data/ExperimentDesign.rda")
 save(ExperimentDesign, file="C:/Users/djaiswal/Documents/R-dev/sugarbag//data/ExperimentDesign.rda")
+
+# Saving Irrigation
+Irrigation<-read.csv("C:/Users/djaiswal/Documents/R-dev/sugarbag/inst/extdata/Irrigation.csv", stringsAsFactors=FALSE)
+save(Irrigation,file="C:/Users/djaiswal/Documents/R-dev/sugarbag//data/Irrigation.rda")
+
 #Saving Experiment Field
 FixedFields<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Field.csv", stringsAsFactors=FALSE)
 FixedFields<-FixedFields[,c(1,3:9,11)]
