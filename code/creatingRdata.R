@@ -34,8 +34,9 @@ save(ExperimentSummary, file="/home/djaiswal/Research/gitprojects/sugarbag/data/
 
 # Saving Experiment Design
 ExperimentDesign<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Design.csv", stringsAsFactors=FALSE)
+ExperimentDesign<-read.csv("C:/Users/djaiswal/Documents/R-dev/sugarbag/inst/extdata/Experiment.Design.csv", stringsAsFactors=FALSE)
 save(ExperimentDesign, file="/home/djaiswal/Research/gitprojects/sugarbag/data/ExperimentDesign.rda")
-
+save(ExperimentDesign, file="C:/Users/djaiswal/Documents/R-dev/sugarbag//data/ExperimentDesign.rda")
 #Saving Experiment Field
 FixedFields<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Field.csv", stringsAsFactors=FALSE)
 FixedFields<-FixedFields[,c(1,3:9,11)]
