@@ -5,7 +5,8 @@ setwd("./")
 expID <-GetExpID_for_N_Combined()
 
 # Step 2 :- Define variable name that we are interested in
-varname <- c("DWDLF","DWGLF","DWMST","DWSTA","DWTOTA","DWTOTB", "DWTOTT",  "LAI",	"NWDLF",	"NWGLF",	"NWMST",	"NWSTA",	"NWTOTA", "SWMST","SWPMST","SWTOTA")
+varname <- c("DWDLF","DWGLF","DWMST","DWSTA","DWTOTA","DWTOTB", "DWTOTT",  
+             "LAI",	"NWDLF",	"NWGLF",	"NWMST",	"NWSTA",	"NWTOTA", "SWMST","SWPMST","SWTOTA")
 
 
 # Creating initial dataframe that will be used for RBind
@@ -111,21 +112,35 @@ variables[variables$VariableName %in% colnames(ndata),]
 
 
 
-d <- OUT[!is.na(DWTOTA), list(Plot, ExpID, Date, Treatment, Ncombined, Cultivar, Irrigation, DWTOTA)]
+d <- OUT[!is.na(DWTOTA), list(Plot, ExpID, Date, Treatment, Ncombined, Cultivar, Irrigation, DWTOTA, SWTOTA, NWTOTA)]
 
 library(dplyr)
 ## Find dates of Harvest (where next measurement is much less that current measurement) 
 
 d2 <- d[,`:=` (harvest = as.logical(Date == max(Date))), by = 'ExpID,Ncombined,Treatment']
 ggplot() + geom_line(data = d2, aes(mdy(Date), DWTOTA, color = Treatment)) + facet_wrap(~ExpID+Ncombined)
-
 d3 <- subset(d2, as.logical(harvest))
-d3$Ncombined[is.na(d3$Ncombined)] <- 0 ## is this appropriate??? not sure why NA's ended up here ...
-ggplot() + geom_point(data = d3, aes(Ncombined, DWTOTA)) + facet_wrap(~ExpID + Cultivar)
-
-
+d3 <- d3[!is.na(Ncombined)]
+#d3$Ncombined[is.na(d3$Ncombined)] <- 0 ## is this appropriate??? not sure why NA's ended up here ...
+ggplot() + geom_point(data = d3, aes(Ncombined, DWTOTA), alpha = 0.4) + facet_wrap(~ExpID)
+ggplot() + geom_point(data = d3, aes(Ncombined, SWTOTA), alpha = 0.4) + facet_wrap(~ExpID)
+ggplot() + geom_point(data = d3, aes(Ncombined, NWTOTA), alpha = 0.4) + facet_wrap(~ExpID)
 ##
-summary(lm(log10(DWTOTA) ~ Ncombined * as.factor(Irrigation), data = d3))
+a <- (lm(DWTOTA ~ Ncombined * as.factor(Irrigation), data = d3))
+plot(a)
+a <- (lm(log10(DWTOTA) ~ Ncombined * as.factor(Irrigation), data = d3))
+plot(a)
 
 ## using ExpID as random effect
-summary(lme4::lmer(log10(DWTOTA) ~ poly(Ncombined,2)  * as.factor(Irrigation) + (1|ExpID), data = d3))
+summary(lme4::lmer(log10(DWTOTA) ~ Ncombined  * as.factor(Irrigation) + (1|ExpID), data = d3))
+
+## Total Aboveground Biomass
+summary(nlme::lme(fixed = log10(DWTOTA) ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d3))
+## Total Sugar Content
+summary(nlme::lme(fixed = SWTOTA/DWTOTA ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d3, subset = !is.na(SWTOTA)))
+## 
+summary(nlme::lme(fixed = NWTOTA/DWTOTA ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d3, subset = !is.na(NWTOTA)))
+
+ggplot(d3) + geom_point(aes(Ncombined, DWTOTA, color = as.logical(Irrigation)))
+ggplot(d3) + geom_point(aes(Ncombined, SWTOTA/DWTOTA, color = as.logical(Irrigation)))
+ggplot(d3) + geom_point(aes(Ncombined, NWTOTA/DWTOTA, color = as.logical(Irrigation)))
