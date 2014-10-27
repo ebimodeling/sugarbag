@@ -1,5 +1,6 @@
-setwd("C:\\Users\\ruizver1\\Documents\\myprojectEBI\\sugarbag")
-
+#setwd("C:\\Users\\ruizver1\\Documents\\myprojectEBI\\sugarbag")
+library(sugarbag)
+setwd("./")
 # Step 1:- Get all the experiment IDs  for whic Harvest, Experiment Design and Planting information is available
 expID <-GetExpID_for_N_Combined()
 
@@ -20,28 +21,22 @@ for (i in 2:N){
 }
 
 #save data in csv format
-setwd("C:\\Users\\ruizver1\\Desktop\\New folder")
-write.csv(Output, file="out.csv", row.names = FALSE)
-output <- read.csv("out.csv")
+#setwd("C:\\Users\\ruizver1\\Desktop\\New folder")
+#write.csv(Output, file="out.csv", row.names = FALSE)
+#output <- read.csv("out.csv")
 
 #how to choose the maximum value of a variable
-library(data.table)
 OUT <- data.table(output)
-NEWOUT <- OUT[,list(Ncombined, Irrigation, Cultivar,      
+ndata <- unique(OUT[,list(Ncombined, Irrigation, Cultivar,      
               
                     DWDLF = max(DWDLF, na.rm = TRUE), DWGLF = max(DWGLF, na.rm = TRUE), DWMST=max(DWMST, na.rm = TRUE),DWSTA=max(DWSTA, na.rm = TRUE),
                     DWTOTA=max(DWTOTA, na.rm = TRUE),LAI=max(LAI, na.rm = TRUE),NWDLF=max(NWDLF, na.rm = TRUE),NWGLF=max(NWGLF, na.rm = TRUE),
                     NWMST=max(NWMST, na.rm = TRUE),NWSTA=max(NWSTA, na.rm = TRUE),NWTOTA=max(NWTOTA, na.rm = TRUE),SWMST=max(SWMST, na.rm = TRUE),
                     SWPMST=max(SWPMST, na.rm = TRUE),SWTOTA=max(SWTOTA, na.rm = TRUE)),
-    by = c('ExpID', 'Plot')]
+    by = c('ExpID', 'Plot')])
 
-write.csv(NEWOUT, file="newout.csv", row.names = FALSE)
-NEWOUT <- read.csv("newout.csv")
-for (i in 6:19){
-NEWOUT2 <- unique(NEWOUT, by = c('ExpID', 'Plot', NEWOUT[,i]) )
-write.csv(NEWOUT2, file="newout2.csv", row.names = FALSE)
-}
-NEWOUT2 <- read.csv("newout2.csv")
+
+NEWOUT2 <- data.frame(ndata)
 
 #this is the wat to graph many columns and try to save the graph
 # vs Nitrogen content
@@ -51,7 +46,7 @@ for (i in 6:19){
   png(file = sprintf("filename_%s.png",i))
   w <- xyplot(NEWOUT2[,i]~Ncombined,NEWOUT2,ylab=names(NEWOUT2[i]))
   print(w)
-          dev.off()
+  dev.off()
 }
 par(p)
 
@@ -69,10 +64,10 @@ par(p)
 f <- factor(NEWOUT2$Irrigation)
 p <- par(mfrow=c(2,2))
 for(i in 6:19){
-  png(file = sprintf("Irrigation_%s.png",i))
+  #png(file = sprintf("Irrigation_%s.png",i))
   w <- xyplot(NEWOUT2[,i]~Ncombined | f,NEWOUT2,ylab=names(NEWOUT2[i]), main=f)
   print(w)
-      dev.off()
+  #    dev.off()
   }
 par(p)
 
