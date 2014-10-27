@@ -81,12 +81,7 @@ for (i in 6:19){
 }
 par(p)
 
-#plots by David
-#library(ggplot2)
-#ggplot(data = NEWOUT2[DWDLF>0]) + geom_point(aes(Ncombined, DWDLF, color = as.logical(Irrigation))) + facet_wrap(~Cultivar+ExpID) + ylim(c(0, 1300))
-#ggplot(data = NEWOUT2) + geom_point(aes(Ncombined, DWGLF, color = as.logical(Irrigation))) + facet_wrap(~Cultivar+ExpID) + ylim(c(0, 1300))
-#ggplot(data = NEWOUT2)
-#OUT[,list(Date[which.max(DWDLF)])]
+
 
 # Plots by Deepak
 #library(lattice)
@@ -96,3 +91,41 @@ par(p)
 #plot(density(Output$DWMST, na.rm=TRUE))
 #Density Plot of TotalN
 #plot(density(Output$TotalN, na.rm=TRUE))
+
+'
+Meta-analysis of N effects on yield, Sugar, and LAI
+'
+
+
+#plots by David
+library(ggplot2)
+ggplot(data = NEWOUT[DWTOTA>0]) + geom_point(aes(Ncombined, DWTOTA, color = as.logical(Irrigation))) + 
+  facet_wrap(~Cultivar+Irrigation) #+ ylim(range(0, max(pretty(ndata$DWTOTA))))
+ggplot(data = NEWOUT) + geom_point(aes(Ncombined, DWTOTA, color = as.logical(Irrigation))) + 
+  facet_wrap(~Cultivar+ExpID) + ylim(c(0, 1300))
+ggplot(data = NEWOUT)
+OUT[,list(Date[which.max(DWDLF)])]
+
+data(variables)
+variables[variables$VariableName %in% colnames(ndata),]
+
+
+
+d <- OUT[!is.na(DWTOTA), list(Plot, ExpID, Date, Treatment, Ncombined, Cultivar, Irrigation, DWTOTA)]
+
+library(dplyr)
+## Find dates of Harvest (where next measurement is much less that current measurement) 
+
+d2 <- d[,`:=` (harvest = as.logical(Date == max(Date))), by = 'ExpID,Ncombined,Treatment']
+ggplot() + geom_line(data = d2, aes(mdy(Date), DWTOTA, color = Treatment)) + facet_wrap(~ExpID+Ncombined)
+
+d3 <- subset(d2, as.logical(harvest))
+d3$Ncombined[is.na(d3$Ncombined)] <- 0 ## is this appropriate??? not sure why NA's ended up here ...
+ggplot() + geom_point(data = d3, aes(Ncombined, DWTOTA)) + facet_wrap(~ExpID + Cultivar)
+
+
+##
+summary(lm(log10(DWTOTA) ~ Ncombined * as.factor(Irrigation), data = d3))
+
+## using ExpID as random effect
+summary(lme4::lmer(log10(DWTOTA) ~ poly(Ncombined,2)  * as.factor(Irrigation) + (1|ExpID), data = d3))
