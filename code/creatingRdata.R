@@ -35,8 +35,19 @@ ExperimentSummary<-read.csv("inst/extdata/Experiment.Summary.csv", stringsAsFact
 save(ExperimentSummary, file="data/ExperimentSummary.rda")
 
 # Saving Experiment Design
+<<<<<<< HEAD
 ExperimentDesign<-read.csv("inst/extdata/Experiment.Design.csv", stringsAsFactors=FALSE)
 save(ExperimentDesign, file="data/ExperimentDesign.rda")
+=======
+ExperimentDesign<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Design.csv", stringsAsFactors=FALSE)
+ExperimentDesign<-read.csv("C:/Users/djaiswal/Documents/R-dev/sugarbag/inst/extdata/Experiment.Design.csv", stringsAsFactors=FALSE)
+save(ExperimentDesign, file="/home/djaiswal/Research/gitprojects/sugarbag/data/ExperimentDesign.rda")
+save(ExperimentDesign, file="C:/Users/djaiswal/Documents/R-dev/sugarbag//data/ExperimentDesign.rda")
+
+# Saving Irrigation
+Irrigation<-read.csv("C:/Users/djaiswal/Documents/R-dev/sugarbag/inst/extdata/Irrigation.csv", stringsAsFactors=FALSE)
+save(Irrigation,file="C:/Users/djaiswal/Documents/R-dev/sugarbag//data/Irrigation.rda")
+>>>>>>> 067bd69f7273a0069dbf9eabbbc3e375ce039f59
 
 #Saving Experiment Field
 FixedFields<-read.csv("inst/extdata/Experiment.Field.csv", stringsAsFactors=FALSE)
@@ -53,5 +64,14 @@ save(Planting, file="data/Planting.rda")
 
 
 # Saving Experiment Sites
+<<<<<<< HEAD
 Experiment.Site<-read.csv("inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
 save(Experiment.Site, file="data/Experiment.Site.rda")
+=======
+Experiment.Site<-read.csv("/home/djaiswal/Research/gitprojects/sugarbag/inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
+save(Experiment.Site, file="/home/djaiswal/Research/gitprojects/sugarbag/data/Experiment.Site.rda")
+
+# Ursula's file
+Experiment.Site<-read.csv("C:/Users/ruizver1/Documents/myprojectEBI/sugarbag/inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
+save(Experiment.Site, file="C:/Users/ruizver1/Documents/myprojectEBI/sugarbag/data/Experiment.Site.rda")
+>>>>>>> 067bd69f7273a0069dbf9eabbbc3e375ce039f59
