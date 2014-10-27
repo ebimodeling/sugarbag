@@ -1,6 +1,8 @@
 ' The following code is simply generating .rda file for
   the dependent variables (measured) in SUGARBAG
 '
+
+# setwd("C:/Users/ruizver1/Documents/myprojectEBI/sugarbag/")
 setwd("/home/djaiswal/Research/gitprojects/sugarbag")
 #setwd("/Users/David LeBauer/R-dev/sugarbag")
 # Saving Experiment Lists
@@ -42,6 +44,7 @@ save(ExperimentDesign, file="data/ExperimentDesign.rda")
 Irrigation<-read.csv("inst/extdata/Irrigation.csv", stringsAsFactors=FALSE)
 save(Irrigation,file="data/Irrigation.rda")
 
+
 #Saving Experiment Field
 FixedFields<-read.csv("inst/extdata/Experiment.Field.csv", stringsAsFactors=FALSE)
 FixedFields<-FixedFields[,c(1,3:9,11)]
@@ -57,6 +60,7 @@ save(Planting, file="data/Planting.rda")
 
 
 # Saving Experiment Sites
+
 Experiment.Site<-read.csv("inst/extdata/Experiment.Site.csv", stringsAsFactors=FALSE)
 save(Experiment.Site, file="data/Experiment.Site.rda")
 
