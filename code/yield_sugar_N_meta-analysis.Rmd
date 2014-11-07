@@ -1,0 +1,237 @@
+
+---
+title: "Overall Effect of N"
+author: "Ursula Ruiz-Vera, Deepak Jaiswal, David LeBauer"
+date: "Fri Nov 07 16:04:51 2014"
+output: html_document
+---
+
+
+```{r }
+#setwd("C:\\Users\\ruizver1\\Documents\\myprojectEBI\\sugarbag")
+library(sugarbag)
+library(data.table)
+library(ggplot2)
+setwd("./")
+knitr::opts_chunk$set(warning=FALSE, cache=TRUE)
+```
+
+## Prepare data
+
+
+```{r}
+# Step 1:- Get all the experiment IDs  for whic Harvest, Experiment Design and Planting information is available
+
+expID <-GetExpID_for_N_Combined()
+# Step 2 :- Define variable name that we are interested in
+
+varname <- c("DWDLF","DWGLF","DWMST","DWSTA","DWTOTA","DWTOTB", "DWTOTT",  
+             "LAI",  "NWDLF",	"NWGLF",	"NWMST",	"NWSTA",	"NWTOTA", "SWMST","SWPMST","SWTOTA", "Latitude.x", "Longitude.x")
+
+## Create dataframe
+id <- expID[1]
+Output <- Update_expID(id, varname)
+N = length(expID)
+
+
+# Get N versus Yield data from all the experiments andRBIND them to Output
+for (i in 2:N){
+  id <- expID[i]
+  tmp_output <- Update_expID(id, varname)
+  Output <- rbind(Output,tmp_output)
+}
+
+```
+
+## Calculate the plot means and then the maximum values of the variables
+
+```{r}
+
+
+OUT <- data.table(Output)
+OUT2 <- OUT[,list(DWDLF = mean(DWDLF, na.rm = TRUE), DWGLF = mean(DWGLF, na.rm = TRUE), DWMST=mean(DWMST, na.rm = TRUE),DWSTA=mean(DWSTA, na.rm = TRUE),
+                  DWTOTA=mean(DWTOTA, na.rm = TRUE),LAI=mean(LAI, na.rm = TRUE), NWDLF=mean(NWDLF, na.rm = TRUE),NWGLF=mean(NWGLF, na.rm = TRUE), 
+                  NWMST=mean(NWMST, na.rm = TRUE),NWSTA=mean(NWSTA, na.rm = TRUE), NWTOTA=mean(NWTOTA, na.rm = TRUE),SWMST=mean(SWMST, na.rm = TRUE),
+                  SWPMST=mean(SWPMST, na.rm = TRUE),SWTOTA=mean(SWTOTA, na.rm = TRUE)),
+            by = c('ExpID', 'Treatment','Date','Ncombined','Cultivar','Irrigation')]
+
+ndata <- unique(OUT2[,list(DWDLF = max(DWDLF, na.rm = TRUE), DWGLF = max(DWGLF, na.rm = TRUE), 
+                           DWMST=max(DWMST, na.rm = TRUE),DWSTA=max(DWSTA, na.rm = TRUE),
+                           DWTOTA=max(DWTOTA, na.rm = TRUE),LAI=max(LAI, na.rm = TRUE), 
+                           NWDLF=max(NWDLF, na.rm = TRUE),NWGLF=max(NWGLF, na.rm = TRUE), 
+                           NWMST=max(NWMST, na.rm = TRUE),NWSTA=max(NWSTA, na.rm = TRUE), 
+                           NWTOTA=max(NWTOTA, na.rm = TRUE),SWMST=max(SWMST, na.rm = TRUE),
+                           SWPMST=max(SWPMST, na.rm = TRUE),SWTOTA=max(SWTOTA, na.rm = TRUE)),
+                     by = c('ExpID', 'Treatment','Ncombined','Cultivar','Irrigation')])
+
+d <- ndata[!is.na(Ncombined), 
+           list(ExpID, Treatment, Ncombined = as.numeric(Ncombined), Cultivar, Irrigation, 
+                DWTOTA, SWTOTA, NWTOTA, DWMST, SWMST,
+                yield = DWTOTA, sugar = SWTOTA, cane_yield = DWMST, cane_sugar = SWMST/DWMST, 
+                nitrogen_concentration = NWTOTA/DWTOTA)]
+## Clean -Inf http://stackoverflow.com/a/12188551/199217
+invisible(lapply(names(d),function(.name) set(d, which(is.infinite(d[[.name]])), j = .name,value =NA)))
+
+```
+
+# Meta-analysis of N effects on yield, Sugar, and LAI
+
+## Exploratory Data Analysis
+
+Our question is:
+
+* Is sugarcane yield and sugar content limited by N and/or water availablility?
+
+Our Model: 
+
+* y = Nitrogen * Irrigation + epsilon
+
+where y is yield or sugar content (of total aboveground biomass, of cane)
+
+### Summarize
+
+```{r}
+library(pander)
+pander(data.frame(n = nrow(d)))
+pander(summary(d[, list(Ncombined, yield, sugar, cane_yield, cane_sugar)], digits = 3))
+pander(summary(lm(yield ~ Ncombined*Irrigation, data = d), digits = 3))
+pander(summary(lm(cane_yield ~ Ncombined*Irrigation, data = d), digits = 3))
+pander(summary(lm(cane_sugar ~ Ncombined*Irrigation, data = d), digits = 3))
+```
+
+### Check distribution, outliers, odd variables 
+
+```{r}
+ggplot(data = d) + 
+  geom_histogram(aes(yield))
+
+ggplot(data = d) + 
+  geom_histogram(aes(sugar))
+
+ggplot(data = d) + 
+  geom_histogram(aes(cane_yield))
+
+ggplot(data = d) + 
+  geom_histogram(aes(cane_sugar))
+
+```
+
+### Records where Cane Sugar Content is too low
+
+```{r}
+pander(d[cane_sugar < 0.1 & cane_sugar > 0])
+d[cane_sugar < 0.1,`:=` (cane_sugar = NA)]
+```
+
+## Look at some of the key relationships
+
+```{r}
+ggplot(data = d) + geom_point(aes(Ncombined, DWTOTA, color = as.logical(Irrigation))) + 
+  facet_wrap(~Cultivar+Irrigation) + ylim(range(0, max(pretty(ndata$DWTOTA))))
+ggplot(data = d) + geom_point(aes(Ncombined, DWTOTA, color = as.logical(Irrigation))) + 
+  facet_wrap(~Cultivar+ExpID) + ylim(range(0, max(pretty(ndata$DWTOTA))))
+
+data(variables)
+if(exists("variables"))pander(variables[variables$VariableName %in% colnames(ndata),])
+```
+
+### Check basic models
+
+These don't seem to look okay. We need to address non-normality
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm(yield ~ Ncombined * as.factor(Irrigation), data = d), main = "Yield")
+
+plot(lm(sugar ~ Ncombined * as.factor(Irrigation), data = d), main = "% Sugar")
+
+plot(lm(cane_yield ~ Ncombined * as.factor(Irrigation), data = d), main = "Cane Yield")
+
+plot(lm(cane_sugar ~ Ncombined * as.factor(Irrigation), data = d), main = "Cane % Sugar")
+
+plot(lm(nitrogen_concentration ~ Ncombined * as.factor(Irrigation), data = d), main = "% Nitrogen")
+
+```
+
+
+```{r}
+
+##this is to do the analysis with the max values of the variables
+
+ggplot(data = d, aes(Ncombined, DWTOTA)) + 
+  geom_point(aes(Ncombined, DWTOTA, color = factor(Cultivar)), alpha = 0.4) + 
+  stat_smooth(method=lm, level=0.9, aes(color = factor(Cultivar))) +
+  facet_wrap(~Irrigation) + ylim(0,10000) + 
+  xlab("amount of N (Kg/ha)") + ylab("Dry Weight of Above-ground Biomass (g/m2)") 
+```
+
+
+## Plants are N limited when not irrigated (?)
+
+```{r}
+ggplot(data = d, aes(Ncombined, sugar)) + 
+  geom_point(aes(Ncombined, sugar, color = Cultivar), alpha = 0.4) + 
+  facet_wrap(~Irrigation) + 
+  stat_smooth(method=lm, level=0.9) +
+  ylim(0,4000) +  xlab("amount of N (Kg/ha)") + ylab("Sucrose in Above-ground Biomass (g/m2)")
+
+ggplot(data = d, aes(Ncombined, nitrogen_concentration)) + 
+  geom_point(aes(Ncombined, nitrogen_concentration, color = Cultivar), alpha = 0.4) + 
+  stat_smooth(method=lm, level=0.9) +
+  facet_wrap(~Irrigation)+ ylim(0,45) + 
+  xlab("amount of N (Kg/ha)") + ylab("Nitrogen in Above-ground Biomass (g/m2)")
+ggplot(data = d, aes(Ncombined, sugar)) + 
+  geom_point(aes(Ncombined, sugar, color = Cultivar), alpha = 0.4) + 
+  facet_wrap(~Irrigation) +  
+  stat_smooth(method=lm, level=0.9) + 
+  ylim(0,0.5) + xlab("amount of N (Kg/ha)") + 
+  ylab("Sucrose/Dry Weight, of the Above-ground Biomass")
+ggplot(data = d, aes(Ncombined, nitrogen_concentration)) + 
+  geom_point(aes(Ncombined, nitrogen_concentration, color = Cultivar), alpha = 0.4) + 
+  facet_wrap(~Irrigation) + ylim(0,0.007) + 
+  stat_smooth(method=lm, level=0.9) + 
+  xlab("amount of N (Kg/ha)") + ylab("Nitrogen/Dry Weight, of the Above-ground Biomass")
+ggplot(data = d, aes(Ncombined, cane_sugar)) + 
+  geom_point(aes(Ncombined, cane_sugar, color = Cultivar), alpha = 0.4) + 
+  stat_smooth(method=lm, level=0.9) + 
+  facet_wrap(~Irrigation) + ylim(0,0.6) + 
+  xlab("amount of N (Kg/ha)") + ylab("Sucrose/Dry Weight, of the Cane (millable stem)")
+####
+```
+
+
+## Regression Models
+
+These are throwing an error ... still need to debug.
+
+### Total Aboveground Biomass
+
+```{r}
+summary(nlme::lme(fixed = yield ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, 
+                  data = d, na.action = na.omit))
+```
+
+## Total Sugar Content
+
+```{r}
+summary(nlme::lme(fixed = sugar ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, 
+                  data = d, na.action = na.omit))
+```
+
+## Nitrogen Concentration
+
+```{r}
+summary(nlme::lme(fixed = nitrogen_concentration ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, 
+                  data = d, na.action = na.omit))
+```
+
+### Sugar Content of Cane
+
+
+```{r}
+summary(nlme::lme(fixed = cane_sugar ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, 
+                  data = d, subset = !is.na(cane_sugar)))
+```
+
+
