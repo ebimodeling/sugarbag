@@ -21,9 +21,10 @@ get_plot_and_treatments<-function(expID)
   Irrigation <- Irrigation[(Irrigation$ExpID == expID),]
   IrrigatedTreatment <- unique(Irrigation$Treatment)
   
+  result$Irrigation = 0
   if(expID %in% IrrigatedExp){
      
-        if(IrrigatedTreatment == "ALL") 
+        if(IrrigatedTreatment[1] == "ALL") 
            {
                result$Irrigation = 1
         } else {
