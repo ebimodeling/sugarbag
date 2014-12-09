@@ -53,34 +53,19 @@ ndata <- unique(OUT2[,list(DWMST=max(DWMST, na.rm = TRUE),DWTOTA=max(DWTOTA, na.
                   NWTOTA=max(NWTOTA, na.rm = TRUE),SWMST=max(SWMST, na.rm = TRUE),SWTOTA=max(SWTOTA, na.rm = TRUE)),
             by = c('ExpID','Treatment','Ncombined','Cultivar','Irrigation')])
 
+#from here, I am selecting the dates when I got the maximum values and chosing those days from the firts file OUT to work with the raw data, not the means
 ndata2 <- merge(OUT2, ndata, by = c('ExpID', 'Treatment', 'Ncombined', 'Cultivar', 'Irrigation'))
 
-ndata3 <- filter(ndata2, SWMST.x-SWMST.y==0)
+ndata3 <- filter(ndata2, SWMST.x-SWMST.y==0, ExpID!= "13", ExpID!="36", ExpID!= "14", ExpID!="7")
 
 ndata4 <- select(ndata3, ExpID, Treatment, Ncombined, Cultivar, Irrigation, Date)
 
 ndata5 <- merge(OUT,ndata4, by = c('ExpID', 'Treatment', 'Date', 'Ncombined', 'Cultivar', 'Irrigation'))
 
-#save data in csv format
-#setwd("C:\\Users\\ruizver1\\Desktop\\New folder")
-#write.csv(ndata, file="ndata.csv", row.names = FALSE)
-#output <- read.csv("ndata.csv")
-
-#write.csv(ndata2, file="ndata2.csv", row.names = FALSE)
-#output <- read.csv("ndata2.csv")
-
-#write.csv(ndata3, file="ndata3.csv", row.names = FALSE)
-output <- read.csv("ndata3.csv")
-
-#write.csv(ndata5, file="ndata5.csv", row.names = FALSE)
-#output <- read.csv("ndata5.csv")
-
+#d is the document with the data I want
 d <- ndata5[!is.na(Ncombined), 
            list(ExpID, Treatment, Ncombined = as.numeric(Ncombined), Cultivar, Irrigation, DWTOTA, SWTOTA, NWTOTA, DWMST, SWMST, 
           yield = DWTOTA, sugar = SWTOTA, cane_yield = DWMST, cane_sugar = SWMST/DWMST, nitrogen_concentration = NWTOTA/DWTOTA)]
-
-write.csv(d, file="d.csv", row.names = FALSE)
-output <- read.csv("d.csv")
 
 ## Clean -Inf http://stackoverflow.com/a/12188551/199217
 invisible(lapply(names(d),function(.name) set(d, which(is.infinite(d[[.name]])), j = .name,value =NA)))
@@ -110,6 +95,8 @@ pander(summary(lm(cane_sugar ~ Ncombined*Irrigation, data = d), digits = 3))
 ```
 ### Check distribution, outliers, odd variables 
 ```{r}
+#dev.off helps me not to have problems running the ggplot
+dev.off()
 ggplot(data = d) + geom_histogram(aes(yield))
 
 ggplot(data = d) + geom_histogram(aes(sugar))
@@ -126,6 +113,7 @@ if(exists("variables"))pander(variables[variables$VariableName %in% colnames(nda
 ggplot(data = d) + geom_point(aes(Ncombined, yield, color = as.logical(Irrigation))) + 
   facet_wrap(~ExpID) + ylim(range(0, max(pretty(ndata$DWTOTA))))
 
+#I won't use the variable sugar because there is few data
 ggplot(data = d) + geom_point(aes(Ncombined, sugar, color = as.logical(Irrigation))) + 
   facet_wrap(~ExpID) + ylim(range(0, 4000))
 
@@ -142,35 +130,43 @@ ggplot(data = d) + geom_point(aes(Ncombined, nitrogen_concentration, color = as.
 ```{r}
 ##graphic with linear regression (by Ursula)
 
+#yield
 ggplot(data = d, aes(Ncombined, yield)) + 
-  geom_point(aes(Ncombined, yield, color = Cultivar), alpha = 0.4) + 
+geom_point(aes(Ncombined, yield ), alpha = 0.4) + 
+stat_smooth(method=lm, level=0.9) +
+ylim(0,9000) + 
+xlab("amount of N (Kg/ha)") + ylab("Dry Weight of Above-ground Biomass (g/m2)")
+
+ggplot(data = d, aes(Ncombined, log(yield))) + 
+  geom_point(aes(Ncombined, log(yield) ), alpha = 0.4) + 
   stat_smooth(method=lm, level=0.9) +
-  facet_wrap(~Irrigation) + ylim(0,10000) + 
-  xlab("amount of N (Kg/ha)") + ylab("Dry Weight of Above-ground Biomass (g/m2)") 
+  ylim(6.5,9.5) + 
+  xlab("amount of N (Kg/ha)") + ylab("Log of the dry Weight of Above-ground Biomass (g/m2)") 
 
-ggplot(data = d, aes(Ncombined, sugar)) + 
-  geom_point(aes(Ncombined, sugar, color = Cultivar), alpha = 0.4) + 
-  facet_wrap(~Irrigation) + 
-  stat_smooth(method=lm, level=0.9) +ylim(0,4000) + 
-   xlab("amount of N (Kg/ha)") + ylab("Sucrose in Above-ground Biomass (g/m2)")
-
+#cane yield
 ggplot(data = d, aes(Ncombined, cane_yield)) + 
-  geom_point(aes(Ncombined, cane_yield, color = Cultivar), alpha = 0.4) + 
+  geom_point(aes(Ncombined, cane_yield), alpha = 0.4) + 
   stat_smooth(method=lm, level=0.9) +
-  facet_wrap(~Irrigation)+  ylim(0,8000) +
+  ylim(0,7000) +
   xlab("amount of N (Kg/ha)") + ylab("Dry weight of the Cane Biomass (g/m2)")
 
+ggplot(data = d, aes(Ncombined, log(cane_yield) )) + 
+  geom_point(aes(Ncombined, log(cane_yield )), alpha = 0.4) + 
+  stat_smooth(method=lm, level=0.9) +
+  ylim(6.5,9.5) +
+    xlab("amount of N (Kg/ha)") + ylab("Dry weight of the Cane Biomass (g/m2)")
+
+#sugar in cane
 ggplot(data = d, aes(Ncombined, cane_sugar)) + 
-  geom_point(aes(Ncombined, cane_sugar, color = Cultivar), alpha = 0.4) + 
-  facet_wrap(~Irrigation) +  
-  stat_smooth(method=lm, level=0.9) + ylim(0,0.6) + 
+  geom_point(aes(Ncombined, cane_sugar), alpha = 0.4) + 
+  stat_smooth(method=lm, level=0.9) + ylim(0.35,0.6) + 
   xlab("amount of N (Kg/ha)") + 
   ylab("Sucrose/Dry Weight, of the Cane Biomass")
 
+#nitrogen in biomass
 ggplot(data = d, aes(Ncombined,nitrogen_concentration) ) + 
-  geom_point(aes(Ncombined, nitrogen_concentration, color = Cultivar), alpha = 0.4) + 
-  facet_wrap(~Irrigation) + 
-  stat_smooth(method=lm, level=0.9) + ylim(0,0.008) + 
+  geom_point(aes(Ncombined, nitrogen_concentration), alpha = 0.4) + 
+  stat_smooth(method=lm, level=0.9) + ylim(0,0.006) + 
   xlab("amount of N (Kg/ha)") + ylab("Nitrogen/Dry Weight, of the Above-ground Biomass")
 ####
 ```
@@ -183,7 +179,6 @@ library(nlme)
 install.packages("lme4")
 
 hist(d$Ncombined)
-hist(sqrt(d$Ncombined))
 
 shapiro.test(d$yield)
 shapiro.test(log10(d$yield))
@@ -191,36 +186,17 @@ shapiro.test(log(d$yield))
 shapiro.test(sqrt(d$yield))
 
 d[,plot(Ncombined, log10(yield))]
-d[,plot(sqrt(Ncombined), log10(yield))]
-
-plot(lm(log10(yield) ~ Ncombined * as.factor(Irrigation), data = d), main = "Yield")
-summary(lm(log10(yield) ~ Ncombined * as.factor(Irrigation), data = d), main="Yield")
-#plot(lm(log10(yield) ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Yield")
-#summary(lm(log10(yield) ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Yield")
+plot(lm(log10(yield) ~ Ncombined, data = d), main = "Yield")
 ```
 
 ```{r}
-#with other variables
-shapiro.test(d$sugar)
-shapiro.test(log10(d$sugar))
-shapiro.test(log(d$sugar))
-shapiro.test(sqrt(d$sugar))
-hist(d$sugar)
-plot(lm(sugar ~ Ncombined * as.factor(Irrigation), data = d), main = "Sugar")
-summary(lm(sugar ~ Ncombined * as.factor(Irrigation), data = d), main = "Sugar")
-#plot(lm(sugar ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Sugar")
-#summary(lm(sugar ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Sugar")
-
 shapiro.test(d$cane_yield)
 shapiro.test(log10(d$cane_yield))
 shapiro.test(log(d$cane_yield))
 shapiro.test(sqrt(d$cane_yield))
 hist(d$cane_yield)
 hist(log10(d$cane_yield))
-plot(lm(log10(cane_yield) ~ Ncombined * as.factor(Irrigation), data = d), main = "Cane Yield")
-summary(lm(log10(cane_yield) ~ Ncombined * as.factor(Irrigation), data = d), main = "Cane Yield")
-#plot(lm(log10(cane_yield) ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Cane Yield")
-#summary(lm(log10(cane_yield) ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Cane Yield")
+plot(lm(log10(cane_yield) ~ Ncombined, data = d), main = "Cane Yield")
 
 #this one (cane_sugar) doesn't fit in any transformation criteria
 shapiro.test(d$cane_sugar)
@@ -228,45 +204,33 @@ shapiro.test(log10(d$cane_sugar))
 shapiro.test(log(d$cane_sugar))
 shapiro.test(sqrt(d$cane_sugar))
 hist(d$cane_sugar)
-plot(lm(cane_sugar ~ Ncombined * as.factor(Irrigation), data = d), main = "Cane % Sugar")
-summary(lm(cane_sugar ~ Ncombined * as.factor(Irrigation), data = d), main = "Cane % Sugar")
-#plot(lm(cane_sugar ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Cane % Sugar")
-#summary(lm(cane_sugar ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "Cane % Sugar")
+plot(lm(cane_sugar ~ Ncombined, data = d), main = "Cane % Sugar")
+
 
 shapiro.test(d$nitrogen_concentration)
 shapiro.test(log10(d$nitrogen_concentration))
 shapiro.test(log(d$nitrogen_concentration))
 shapiro.test(sqrt(d$nitrogen_concentration))
 hist(d$nitrogen_concentration)
-plot(lm(nitrogen_concentration ~ Ncombined * as.factor(Irrigation), data = d), main = "% Nitrogen")
-summary(lm(nitrogen_concentration ~ Ncombined * as.factor(Irrigation), data = d), main = "% Nitrogen")
-#plot(lm(nitrogen_concentration ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "% Nitrogen")
-#summary(lm(nitrogen_concentration ~ sqrt(Ncombined) * as.factor(Irrigated), data = d), main = "% Nitrogen")
+plot(lm(nitrogen_concentration ~ Ncombined, data = d), main = "% Nitrogen")
+
 ```
 ## Regression Models
 #These are throwing an error ... still need to debug.
 ### Total Aboveground Biomass
 ```{r}
-summary(nlme::lme(fixed = log(yield) ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
-#summary(nlme::lme(fixed = log(yield) ~ sqrt(Ncombined) * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
-```
-## Total Sugar Content
-```{r}
-summary(nlme::lme(fixed = sugar ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
-#summary(nlme::lme(fixed = sugar ~ sqrt(Ncombined) * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
+summary(nlme::lme(fixed = log(yield) ~ Ncombined, random = ~1|ExpID, data = d, na.action = na.omit))
 ```
 ### Cane_Yield
 ```{r}
-summary(nlme::lme(fixed = log(cane_yield) ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
-summary(nlme::lme(fixed = log(cane_yield) ~ sqrt(Ncombined) * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
+summary(nlme::lme(fixed = log(cane_yield) ~ Ncombined, random = ~1|ExpID, data = d, na.action = na.omit))
 ```
 ### Sugar Content of Cane
 ```{r}
-summary(nlme::lme(fixed = cane_sugar ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
-#summary(nlme::lme(fixed = cane_sugar ~ sqrt(Ncombined) * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
+summary(nlme::lme(fixed = cane_sugar ~ Ncombined, random = ~1|ExpID, data = d, na.action = na.omit))
 ```
 ## Nitrogen Concentration
 ```{r}
-summary(nlme::lme(fixed = nitrogen_concentration ~ Ncombined * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
-#summary(nlme::lme(fixed = nitrogen_concentration ~ sqrt(Ncombined) * as.factor(Irrigation), random = ~1|ExpID, data = d, na.action = na.omit))
+summary(nlme::lme(fixed = nitrogen_concentration ~ Ncombined, random = ~1|ExpID, data = d, na.action = na.omit))
 ```
+
