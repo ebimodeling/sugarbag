@@ -1,6 +1,6 @@
 ## DATA USE PROTOCOLS AND CONTACT INFORMATION
 
-This is copied from page 7 of the Sugarbag Documentation (see [SUGARBAG-Booklet.pdf](https://github.com/ebimodeling/sugarbag/blob/master/SUGARBAG-Booklet.pdf?raw=true))
+_copied from page 7 of the Sugarbag Documentation (see [SUGARBAG-Booklet.pdf](https://github.com/ebimodeling/sugarbag/blob/master/SUGARBAG-Booklet.pdf?raw=true))_
 
 The SUGARBAG database system aims to protect the rights of individual scientists with regard to data
 ownership and access. The agreed protocol is that each data owner should be consulted (via Di
